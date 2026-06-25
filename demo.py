@@ -7,6 +7,7 @@ Ce script teste toutes les composantes du système :
   3. Agent conversationnel avec mémoire
   4. Extraction du diagnostic structuré Pydantic
 """
+
 import json
 import sys
 sys.path.insert(0, '/home/claude/vigne_agent')
@@ -142,7 +143,7 @@ def demo_agent_memoire():
     from agent.vigne_agent import build_vigne_agent, chat_avec_agent
     
     print("\n🏗️  Construction du graphe LangGraph...")
-    agent = build_vigne_agent(use_ollama=False)
+    agent = build_vigne_agent(use_ollama=True, model_name="llama3.1")
     print("✅ Agent compilé avec MemorySaver (checkpointer)")
     
     # Session de conversation — thread_id fixe pour la mémoire
