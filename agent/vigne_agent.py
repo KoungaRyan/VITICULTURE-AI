@@ -25,6 +25,7 @@ from langchain_ollama import ChatOllama
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.prebuilt import ToolNode
 
 import sys
@@ -80,9 +81,9 @@ PROMPT_DIAGNOSTIC = ChatPromptTemplate.from_messages([
 # ─────────────────────────────────────────────────────────────
 def get_model(
     use_ollama: bool = True,
-    model_name: str = "llama3.2",
+    model_name: str = "llama3.1",
     timeout: int = 180,
-    num_ctx: int = 1024,       # Réduit au max → moins de RAM → stable avec llama3.2 8B
+    num_ctx: int = 1024,       # Réduit au max → moins de RAM → stable avec llama3.1 8B
     num_predict: int = 300,    # Court → évite les crashes mid-stream
 ) -> object:
     """
@@ -128,7 +129,7 @@ def invoke_with_retry(model, messages, max_retries: int = 2) -> BaseMessage:
     Invoque le modèle avec retry automatique sur erreur réseau.
     Tronque le contexte si trop long.
     """
-    # Limiter l'historique à 4 messages max (llama3.1 8B sensible au contexte long)
+    # Limiter l'historique à 4 messages max pour éviter les dépassements de contexte
     if len(messages) > 5:
         system_msgs = [m for m in messages if isinstance(m, SystemMessage)]
         other_msgs = [m for m in messages if not isinstance(m, SystemMessage)]
@@ -397,11 +398,12 @@ def route_after_agent(state: AgentState) -> str:
 def build_vigne_agent(
     use_ollama: bool = True,
     model_name: str = "llama3.2",
-    timeout: int = 120,
+    timeout: int = 180,
     num_ctx: int = 2048,
     num_predict: int = 512,
+    db_path: str = "viti_ai_conversations.db",
 ):
-    """Compile le graphe LangGraph avec mémoire."""
+    """Compile le graphe LangGraph avec SqliteSaver (persistance entre redémarrages)."""
     base_model = get_model(use_ollama, model_name, timeout, num_ctx, num_predict)
 
     model_with_tools = (
@@ -410,7 +412,12 @@ def build_vigne_agent(
         else base_model
     )
 
-    checkpointer = MemorySaver()
+    import sqlite3 as _sqlite3
+    _conn = _sqlite3.connect(db_path, check_same_thread=False)
+    checkpointer = SqliteSaver(_conn)
+    checkpointer.setup()           # Crée les tables si elles n'existent pas
+    print(f"\U0001f4be SqliteSaver actif \u2192 {db_path}")
+
     workflow = StateGraph(AgentState)
 
     workflow.add_node("agent", lambda s: node_agent(s, model_with_tools))
@@ -426,6 +433,7 @@ def build_vigne_agent(
     workflow.add_edge("extract_diagnostic", END)
 
     return workflow.compile(checkpointer=checkpointer)
+
 
 
 # ─────────────────────────────────────────────────────────────
