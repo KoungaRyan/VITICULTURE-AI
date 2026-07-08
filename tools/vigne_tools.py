@@ -3,10 +3,7 @@ Outils (Tools) de l'agent agronome viticole.
 Étape 2 : Calcul, météo, seuils d'alerte.
 """
 import json
-import math
 import requests
-from datetime import datetime
-from typing import Optional
 from langchain_core.tools import tool
 
 
@@ -17,7 +14,7 @@ from langchain_core.tools import tool
 def get_meteo_vigne(latitude: float, longitude: float, jours: int = 3) -> str:
     """
     Récupère les données météo actuelles et prévisions pour évaluer
-    les risques phytosanitaires (mildiou, oïdium, botrytis) sur la vigne.
+    les risques de maladies (mildiou, oïdium, botrytis) sur la vigne.
 
     Args:
         latitude: Latitude de la parcelle (ex: 44.83 pour Bordeaux)
@@ -111,7 +108,7 @@ def _calcul_risque_mildiou(temp: float, humidity: float, precip: float) -> str:
     if precip > 0.3 and humidity >= 90:
         score += 2  # règle des 3-10 (Müller)
     if score >= 6:
-        return "Élevé ⚠️"
+        return "Élevé"
     elif score >= 3:
         return "Modéré"
     return "Faible"
@@ -128,7 +125,7 @@ def _calcul_risque_oidium(temp: float, humidity: float) -> str:
     elif humidity > 75:
         score += 1
     if score >= 4:
-        return "Élevé ⚠️"
+        return "Élevé"
     elif score >= 2:
         return "Modéré"
     return "Faible"
@@ -143,7 +140,7 @@ def _calcul_risque_botrytis(temp: float, humidity: float, precip: float) -> str:
     if precip > 2:
         score += 2
     if score >= 5:
-        return "Élevé ⚠️"
+        return "Élevé"
     elif score >= 3:
         return "Modéré"
     return "Faible"

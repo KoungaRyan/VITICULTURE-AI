@@ -30,7 +30,7 @@ from models.schemas import DiagnosticVigne
 # ─────────────────────────────────────────
 # CONFIG (modifiable via variables d'env)
 # ─────────────────────────────────────────
-OLLAMA_MODEL   = os.getenv("OLLAMA_MODEL",   "llama3.2")
+OLLAMA_MODEL   = os.getenv("OLLAMA_MODEL",   "qwen3.5:4b")
 OLLAMA_URL     = os.getenv("OLLAMA_URL",     "http://localhost:11434")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "180"))
 OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "2048"))
@@ -199,7 +199,7 @@ app = FastAPI(
 Mildiou, Oïdium, Botrytis, Black-rot, Excoriose, Cochylis, Cicadelles, Acariens
 
 ### Architecture
-`ChatPromptTemplate | ChatOllama(llama3.2) | JsonOutputParser → DiagnosticVigne`
+`ChatPromptTemplate | ChatOllama(qwen3.5) | JsonOutputParser → DiagnosticVigne`
     """,
     version="1.1.0",
     lifespan=lifespan

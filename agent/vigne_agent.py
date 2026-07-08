@@ -17,14 +17,14 @@ from langchain_core.messages import (
     BaseMessage, HumanMessage, AIMessage, SystemMessage, ToolMessage
 )
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.runnables import  RunnableLambda
 
 from langchain_ollama import ChatOllama
 
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
-from langgraph.checkpoint.memory import MemorySaver
+#from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.prebuilt import ToolNode
 
@@ -81,7 +81,7 @@ PROMPT_DIAGNOSTIC = ChatPromptTemplate.from_messages([
 # ─────────────────────────────────────────────────────────────
 def get_model(
     use_ollama: bool = True,
-    model_name: str = "llama3.1",
+    model_name: str = "qwen3.5:4b",
     timeout: int = 180,
     num_ctx: int = 1024,       # Réduit au max → moins de RAM → stable avec llama3.1 8B
     num_predict: int = 300,    # Court → évite les crashes mid-stream
@@ -397,7 +397,7 @@ def route_after_agent(state: AgentState) -> str:
 # ─────────────────────────────────────────────────────────────
 def build_vigne_agent(
     use_ollama: bool = True,
-    model_name: str = "llama3.2",
+    model_name: str = "qwen3.5:4b",
     timeout: int = 180,
     num_ctx: int = 2048,
     num_predict: int = 512,
