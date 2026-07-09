@@ -15,6 +15,8 @@ __pycache__/
 *.pyc
 
 # Database
+data/Grapevine_img
+data/*.sqlite
 *.db
 
 # IDE

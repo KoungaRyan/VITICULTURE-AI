@@ -1,11 +1,13 @@
 """
 Outils (Tools) de l'agent agronome viticole.
-Étape 2 : Calcul, météo, seuils d'alerte.
+Étape 2 : Calcul, météo, seuils d'alerte,accès à l'historique structuré du Data Commons .
 """
 import json
 import requests
 from langchain_core.tools import tool
+from data_commons.storage import DataCommonsStore
 
+_data_commons_store = DataCommonsStore()
 
 # ─────────────────────────────────────────
 # OUTIL 1 : Données météo via Open-Meteo
@@ -444,5 +446,25 @@ def _interprete_potentiel(pa):
         return "Sur-maturité - risque de déséquilibre"
 
 
+
+@tool
+def get_contexte_parcelle(id_parcelle: str, limite: int = 10) -> dict:
+    """
+    Retourne l'historique météo/maturation/maladies/traitements d'une parcelle.
+
+    À utiliser AVANT de produire un diagnostic ou une recommandation de
+    traitement, pour vérifier si un traitement a déjà été appliqué récemment,
+    si une maladie a déjà été observée sur cette parcelle, ou pour comparer
+    la maturation actuelle à la tendance récente.
+
+    Args:
+        id_parcelle: identifiant de la parcelle (ex: "irouleguy-pilote-01")
+        limite: nombre max d'enregistrements par catégorie à retourner (défaut 10)
+
+    Returns:
+        dict avec les clés: meteo, maturation, maladies, traitements
+    """
+    return _data_commons_store.get_historique_parcelle(id_parcelle, limite)
+
 # Liste des outils disponibles
-VIGNE_TOOLS = [get_meteo_vigne, get_seuils_alerte, calcul_agronomique]
+VIGNE_TOOLS = [get_meteo_vigne, get_seuils_alerte, calcul_agronomique, get_contexte_parcelle]

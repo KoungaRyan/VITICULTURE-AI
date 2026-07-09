@@ -52,7 +52,7 @@ SYSTEM_AGRONOME = """Tu es VITI-AI, expert viticole. Réponds en français, sois
 Date: {date_actuelle}
 Parcelle: {parcelle_context}
 Maladies gérées: mildiou, oïdium, botrytis, black-rot, excoriose, cochylis, acariens.
-Utilise tes outils pour météo/seuils/calculs. Rappelle les DAR. Propose alternatives bio."""
+Utilise tes outils pour météo/seuils/calculs/historique d'une parcelle — à utiliser avant tout diagnostic pour vérifier l'historique de la parcelle concernée. Rappelle les DAR. Propose alternatives bio."""
 
 PROMPT_AGENT = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_AGRONOME),
@@ -73,7 +73,6 @@ PROMPT_DIAGNOSTIC = ChatPromptTemplate.from_messages([
     ("system", PROMPT_DIAGNOSTIC_SYSTEM),
     ("human", "Conversation :\n{conversation}\n\nMeteo :\n{meteo_context}"),
 ])
-
 
 
 # ─────────────────────────────────────────────────────────────

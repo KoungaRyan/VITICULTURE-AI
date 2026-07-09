@@ -30,7 +30,7 @@ def separateur(titre: str):
 def demo_outils():
     separateur("ÉTAPE 1 — Outils Agronomes")
     
-    from tools.vigne_tools import get_meteo_vigne, get_seuils_alerte, calcul_agronomique
+    from tools.vigne_tools import get_meteo_vigne, get_seuils_alerte, calcul_agronomique, get_contexte_parcelle
     
     # 1a. Outil Météo — Bordeaux
     print("\n📡 [Outil 1] Météo pour Bordeaux (44.83°N, -0.57°E) :")
@@ -86,6 +86,15 @@ def demo_outils():
     im_data = json.loads(im)
     print(f"\n  Indice Mildiou EPI (T=20°C, pluie=8mm, HR=85%) : {im_data['indice_EPI']}")
     print(f"  Risque : {im_data['risque']}")
+    
+    #1d. Historique parcelle
+    print("\n📜 [Outil 4] Historique parcelle :")
+    contexte = get_contexte_parcelle.invoke({"id_parcelle": "irouleguy-pilote-01"})
+    contexte_data = json.loads(contexte)
+    print(f"  Météo : {len(contexte_data.get('meteo', []))} relevés")
+    print(f"  Maturation : {len(contexte_data.get('maturation', []))} observations")
+    print(f"  Maladies : {len(contexte_data.get('maladies', []))} cas")
+    print(f"  Traitements : {len(contexte_data.get('traitements', []))} applications")
 
 
 # ─────────────────────────────────────────────────────────────

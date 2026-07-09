@@ -25,6 +25,8 @@ sys.path.insert(0, '/home/claude/vigne_agent')
 from agent.vigne_agent import build_vigne_agent, chat_avec_agent
 from tools.vigne_tools import get_meteo_vigne, get_seuils_alerte, calcul_agronomique
 from models.schemas import DiagnosticVigne
+from data_commons.api_router import router as data_commons_router
+
 
 
 # ─────────────────────────────────────────
@@ -343,6 +345,10 @@ async def get_diagnostic(thread_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ─────────────────────────────────────────
+# ENDPOINTS — DATA COMMONS
+# ─────────────────────────────────────────
+app.include_router(data_commons_router, prefix="/data-commons", tags=["data-commons"])
 
 # ─────────────────────────────────────────
 # ENDPOINTS — HISTORIQUE
