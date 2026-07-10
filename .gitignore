@@ -16,6 +16,7 @@ __pycache__/
 
 # Database
 data/Grapevine_img
+volumes
 data/*.sqlite
 *.db
 

@@ -400,7 +400,7 @@ def build_vigne_agent(
     timeout: int = 180,
     num_ctx: int = 2048,
     num_predict: int = 512,
-    db_path: str = "viti_ai_conversations.db",
+    db_path: str = "data/viti_ai_conversations.db",
 ):
     """Compile le graphe LangGraph avec SqliteSaver (persistance entre redémarrages)."""
     base_model = get_model(use_ollama, model_name, timeout, num_ctx, num_predict)

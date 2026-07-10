@@ -2,11 +2,19 @@
 Outils (Tools) de l'agent agronome viticole.
 Étape 2 : Calcul, météo, seuils d'alerte,accès à l'historique structuré du Data Commons .
 """
+from __future__ import annotations
 import json
 import requests
 from langchain_core.tools import tool
 from data_commons.storage import DataCommonsStore
+from vector_store.milvus_client import VectorStore
+from embeddings.text_embedder import embed_text
+from collections import Counter
+from embeddings.image_embedder import embed_image
 
+SEUIL_CONFIANCE_MIN = 0.55  # score de similarité cosinus en dessous duquel on ne conclut pas
+
+_vector_store = VectorStore()
 _data_commons_store = DataCommonsStore()
 
 # ─────────────────────────────────────────
@@ -466,5 +474,93 @@ def get_contexte_parcelle(id_parcelle: str, limite: int = 10) -> dict:
     """
     return _data_commons_store.get_historique_parcelle(id_parcelle, limite)
 
+
+
+@tool
+def rechercher_connaissance_phytosanitaire(question: str, categorie: str | None = None, top_k: int = 3) -> dict:
+    """
+    Recherche dans la base documentaire phytosanitaire (guides de traitement,
+    fiches maladies, réglementation) pour répondre à une question technique
+    ou justifier une recommandation.
+
+    Utiliser ce tool quand une réponse nécessite une justification technique
+    précise (posologie, délai avant récolte, symptômes caractéristiques) qui
+    ne se trouve ni dans get_seuils_alerte (seuils chiffrés) ni dans le
+    Data Commons structuré (historique).
+
+    Args:
+        question: la question ou le sujet à rechercher
+        categorie: filtre optionnel ("maladie", "traitement", "reglementation")
+        top_k: nombre d'extraits à retourner (défaut 3)
+
+    Returns:
+        dict avec une liste "extraits" (texte, source, score_similarite)
+    """
+    vecteur_requete = embed_text(question, task_prefix="search_query")
+    resultats = _vector_store.search_connaissances(vecteur_requete, top_k=top_k, categorie=categorie)
+
+    return {
+        "question": question,
+        "extraits": resultats,
+        "nb_resultats": len(resultats),
+    }
+
+
+
+@tool
+def diagnostiquer_image_maladie(image_path: str, id_parcelle: str, top_k: int = 5) -> dict:
+    """
+    Diagnostique une maladie de la vigne à partir d'une image (photo robot/drone)
+    en la comparant par similarité vectorielle aux images de référence déjà
+    labellisées dans le Data Commons.
+
+    Utiliser ce tool quand une image est disponible (après une prise de vue
+    robot déclenchée pour lever un doute, par exemple). Ne PAS l'utiliser sans
+    image réelle — combiner ensuite avec get_seuils_alerte et
+    get_contexte_parcelle pour la recommandation finale.
+
+    Args:
+        image_path: chemin local ou URL de l'image à diagnostiquer
+        id_parcelle: parcelle d'où provient l'image (pour tracer le résultat)
+        top_k: nombre d'images de référence à comparer (défaut 5)
+
+    Returns:
+        dict: maladie_probable, confiance (0-1), severite_estimee,
+              nb_references_consultees, references (détail des matches),
+              alerte_faible_confiance (bool)
+    """
+    vecteur = embed_image(image_path)
+    matches = _vector_store.search_images_similaires(vecteur, top_k=top_k)
+
+    if not matches:
+        return {
+            "maladie_probable": None,
+            "confiance": 0.0,
+            "alerte_faible_confiance": True,
+            "message": "Aucune image de référence dans le Data Commons pour comparaison.",
+        }
+
+    # Vote pondéré par similarité (cosinus, Milvus renvoie déjà la distance/score)
+    votes = Counter()
+    for m in matches:
+        votes[m["maladie"]] += m["score_similarite"]
+
+    maladie_probable, score_total = votes.most_common(1)[0]
+    confiance = score_total / sum(votes.values())
+
+    severites_associees = [m["severite"] for m in matches if m["maladie"] == maladie_probable]
+    severite_estimee = round(sum(severites_associees) / len(severites_associees), 1)
+
+    return {
+        "maladie_probable": maladie_probable,
+        "confiance": round(float(confiance), 3),
+        "severite_estimee": severite_estimee,
+        "nb_references_consultees": len(matches),
+        "references": matches,
+        "alerte_faible_confiance": confiance < SEUIL_CONFIANCE_MIN,
+        "id_parcelle": id_parcelle,
+    }
+
+
 # Liste des outils disponibles
-VIGNE_TOOLS = [get_meteo_vigne, get_seuils_alerte, calcul_agronomique, get_contexte_parcelle]
+VIGNE_TOOLS = [get_meteo_vigne, get_seuils_alerte, calcul_agronomique, get_contexte_parcelle,rechercher_connaissance_phytosanitaire,diagnostiquer_image_maladie]

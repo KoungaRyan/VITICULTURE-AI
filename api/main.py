@@ -38,7 +38,7 @@ OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "180"))
 OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "2048"))
 OLLAMA_PREDICT = int(os.getenv("OLLAMA_PREDICT", "512"))
 USE_OLLAMA     = os.getenv("USE_OLLAMA", "true").lower() == "true"
-DB_PATH        = os.getenv("DB_PATH", "viti_ai_conversations.db")
+DB_PATH        = os.getenv("DB_PATH", "data/viti_ai_conversations.db")
 
 
 # ─────────────────────────────────────────
