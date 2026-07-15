@@ -32,7 +32,7 @@ from data_commons.api_router import router as data_commons_router
 # ─────────────────────────────────────────
 # CONFIG (modifiable via variables d'env)
 # ─────────────────────────────────────────
-OLLAMA_MODEL   = os.getenv("OLLAMA_MODEL",   "qwen3.5:4b")
+OLLAMA_MODEL   = os.getenv("OLLAMA_MODEL",   "llama3.2:3b")
 OLLAMA_URL     = os.getenv("OLLAMA_URL",     "http://localhost:11434")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "180"))
 OLLAMA_NUM_CTX = int(os.getenv("OLLAMA_NUM_CTX", "2048"))

@@ -1,4 +1,4 @@
-from agent.vigne_agent import build_vigne_agent  # ou le nom de votre graphe compilé
+from agent.vigne_agent import build_vigne_agent  # nom du graphe compilé
 
 graph = build_vigne_agent()
 

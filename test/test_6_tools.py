@@ -11,7 +11,8 @@ import time
 import traceback
 
 os.environ.setdefault("USE_OLLAMA_EMBEDDINGS", "true")
-os.environ.setdefault("MILVUS_URI", "http://localhost:19530")
+# "data/milvus_lite.db" en dev local, ou "http://localhost:19530" avec docker
+os.environ.setdefault("MILVUS_URI", "data/milvus_lite.db")
 
 PALIER_OK = "✅"
 PALIER_KO = "❌"
@@ -69,8 +70,8 @@ def test_ollama():
     r.raise_for_status()
     modeles = [m["name"] for m in r.json().get("models", [])]
     print("Modèles Ollama disponibles:", modeles)
-    if not any("qwen2.5" in m or "llama3" in m for m in modeles):
-        print(f"{PALIER_WARN}Aucun modèle LLM attendu trouvé (qwen2.5 / llama3.x)")
+    if not any("qwen3.5" in m or "llama3" in m for m in modeles):
+        print(f"{PALIER_WARN}Aucun modèle LLM attendu trouvé (qwen3.5 / llama3.x)")
     if not any("nomic-embed-text" in m for m in modeles):
         print(f"{PALIER_WARN}nomic-embed-text absent — faites: ollama pull nomic-embed-text")
     return modeles

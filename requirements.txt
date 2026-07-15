@@ -1,0 +1,31 @@
+
+# --- Orchestration agentique (LangGraph / LangChain) -------------------------
+langchain==0.3.27
+langchain-core==0.3.79
+langgraph==0.6.11
+langgraph-checkpoint-sqlite==2.0.11
+langchain_ollama==1.1.0    
+
+# --- API ----------------------------------------------------------------------
+fastapi==0.121.2
+uvicorn[standard]==0.38.0
+pydantic==2.12.4                        
+python-multipart==0.0.20               
+
+# --- Data Commons ---------------------------------------------------------
+requests==2.32.5                       
+python-dotenv==1.1.1                    
+
+# --- Base vectorielle (Milvus) -------------------------------------------
+pymilvus[milvus_lite]==3.0.0
+pymilvus[milvus_lite]            
+
+# --- Embeddings ------------------------------------------------------------
+transformers==4.57.1
+sentence-transformers==5.1.2
+pillow==11.3.0
+                           
+
+# --- Utilitaires génériques -------------------------------------------------
+numpy==2.2.6
+
