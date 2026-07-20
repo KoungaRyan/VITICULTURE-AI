@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel as PydanticBaseModel, Field
 
 sys.path.insert(0, '/home/claude/vigne_agent')
-from agent.vigne_agent import build_vigne_agent, chat_avec_agent
+from agents.supervisor import build_supervisor , chat_avec_supervisor 
 from tools.vigne_tools import get_meteo_vigne, get_seuils_alerte, calcul_agronomique
 from models.schemas import DiagnosticVigne
 from data_commons.api_router import router as data_commons_router
@@ -91,7 +91,7 @@ vigne_app_instance = {}
 async def lifespan(app: FastAPI):
     print(f"🌿 Démarrage VITI-AI | modèle={OLLAMA_MODEL} | ctx={OLLAMA_NUM_CTX} | timeout={OLLAMA_TIMEOUT}s")
     print(f"💾 Base SQLite : {DB_PATH}")
-    vigne_app_instance["agent"] = build_vigne_agent(
+    vigne_app_instance["agent"] = build_supervisor(
         use_ollama=USE_OLLAMA,
         model_name=OLLAMA_MODEL,
         timeout=OLLAMA_TIMEOUT,
@@ -293,7 +293,7 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=503, detail="Agent non initialisé")
 
     try:
-        result = chat_avec_agent(
+        result = chat_avec_supervisor(
             app=agent,
             message=request.message,
             thread_id=request.thread_id,

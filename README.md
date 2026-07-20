@@ -159,69 +159,9 @@ uvicorn api.main:app --reload --port 8000
 open http://localhost:8000/docs
 ```
 
-### Configuration dans `agent/vigne_agent.py`
 
-```python
-# Basculer entre simulation et Ollama
-agent = build_vigne_agent(
-    use_ollama=True,        # False = mode simulation
-    model_name="llama3.2"  # ou "mistral", "llama3.1", etc.
-)
-```
 
----
 
-## Exemple d'Utilisation
-
-### Conversation avec mémoire
-
-```python
-from agent.vigne_agent import build_vigne_agent, chat_avec_agent
-
-agent = build_vigne_agent(use_ollama=True)
-
-# Tour 1 — L'historique commence
-r1 = chat_avec_agent(
-    agent,
-    "Mes feuilles ont des taches huileuses en floraison",
-    thread_id="exploitation_dupont",
-    parcelle_context={"localisation": "Bordeaux", "cepage": "Merlot"}
-)
-
-# Tour 2 — L'agent se souvient du contexte
-r2 = chat_avec_agent(
-    agent,
-    "Il a plu 12mm ce matin, quel est le risque ?",
-    thread_id="exploitation_dupont"  # Même thread = mémoire conservée
-)
-
-# Tour 3 — Diagnostic structuré Pydantic
-r3 = chat_avec_agent(
-    agent,
-    "Faites un diagnostic complet structuré",
-    thread_id="exploitation_dupont"
-)
-print(r3["diagnostic"])  # → DiagnosticVigne validé
-```
-
-### API REST
-
-```bash
-# Chat avec mémoire
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Taches huileuses sur mes vignes", "thread_id": "session_001"}'
-
-# Météo + risques phytosanitaires
-curl -X POST http://localhost:8000/tools/meteo \
-  -d '{"latitude": 44.83, "longitude": -0.57, "jours": 3}'
-
-# Calcul dose traitement
-curl -X POST http://localhost:8000/tools/calcul \
-  -d '{"operation": "dose_traitement", "parametres": {"surface_ha": 3.5, "dose_L_ha": 2.5}}'
-```
-
----
 
 ## Maladies et Ravageurs Gérés
 
@@ -237,31 +177,7 @@ curl -X POST http://localhost:8000/tools/calcul \
 
 ---
 
-## Calculs Agronomiques Intégrés
 
-```python
-# Degrés-Jours de Croissance
-calcul_agronomique("degres_jours", temp_base=10, temp_moy_jour=22, jours=1)
-# → 12.0 °C.jours
-
-# Dose de traitement
-calcul_agronomique("dose_traitement", surface_ha=3.5, dose_L_ha=2.5)
-# → 8.75 L de produit pour 3.5 ha
-
-# Potentiel alcoolique
-calcul_agronomique("potentiel_alcool", densite=1082)
-# → 12.3% vol.
-
-# Indice de risque Mildiou (EPI)
-calcul_agronomique("indice_mildiou", temperature=20, pluie_mm=8, humidite_pct=85)
-# → EPI: 8.3 (Faible)
-
-# Surface Foliaire Exposée (LAI)
-calcul_agronomique("surface_feuillaire", longueur_feuille_cm=15, largeur_feuille_cm=14)
-# → LAI: 1.85 m²/m²
-```
-
----
 
 ## Technologies Utilisées
 
